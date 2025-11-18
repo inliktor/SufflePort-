@@ -236,32 +236,32 @@ public class CreateDatabase {
 
     private void createEventsTable(Statement st) throws SQLException {
         st.execute("""
-            CREATE TABLE IF NOT EXISTS events (
-                event_id     BIGSERIAL PRIMARY KEY,
-                uid          TEXT REFERENCES cards(uid),
-                person_id    UUID REFERENCES personnel(person_id),
-                face_name    TEXT REFERENCES faces(face_name),
-                device_id    TEXT REFERENCES devices(device_id),
-                direction    direction_t NOT NULL,
-                source       source_t    NOT NULL,
-                meta         JSONB NOT NULL DEFAULT '{}'::jsonb,
-                created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-                CHECK (uid IS NOT NULL OR face_name IS NOT NULL OR person_id IS NOT NULL)
-            )
-        """);
+        CREATE TABLE IF NOT EXISTS events (
+            event_id     BIGSERIAL PRIMARY KEY,
+            uid          TEXT REFERENCES cards(uid),
+            person_id    UUID REFERENCES personnel(person_id),
+            face_name    TEXT REFERENCES faces(face_name),
+            device_id    TEXT REFERENCES devices(device_id),
+            direction    TEXT NOT NULL,
+            source       TEXT NOT NULL,
+            meta         JSONB NOT NULL DEFAULT '{}'::jsonb,
+            created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+            CHECK (uid IS NOT NULL OR face_name IS NOT NULL OR person_id IS NOT NULL)
+        )
+    """);
 
         st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at)
-        """);
+        CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at)
+    """);
         st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_events_person_id  ON events(person_id)
-        """);
+        CREATE INDEX IF NOT EXISTS idx_events_person_id  ON events(person_id)
+    """);
         st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_events_uid        ON events(uid)
-        """);
+        CREATE INDEX IF NOT EXISTS idx_events_uid        ON events(uid)
+    """);
         st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_events_device_id  ON events(device_id)
-        """);
+        CREATE INDEX IF NOT EXISTS idx_events_device_id  ON events(device_id)
+    """);
     }
 
 
