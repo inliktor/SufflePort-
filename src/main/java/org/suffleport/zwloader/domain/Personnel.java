@@ -51,6 +51,7 @@ public class Personnel {
     @Column(name = "created_at", updatable = false, insertable = false)
     private OffsetDateTime createdAt; // когда запись создана (ставит БД через DEFAULT now())
 
+
     // Пустой конструктор нужен JPA
     public Personnel() {
     }
@@ -95,4 +96,5 @@ public class Personnel {
         if (middleName != null) sb.append(middleName);
         return sb.toString().trim();
     }
+
 }

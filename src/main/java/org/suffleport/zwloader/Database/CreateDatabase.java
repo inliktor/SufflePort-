@@ -36,13 +36,12 @@ public class CreateDatabase {
             createPositionsTable(st);
             createPersonnelTable(st);
             createCardsTable(st);
-            createFacesTable(st);
             createDevicesTable(st);
             createCamerasTable(st);
             createGuestsTables(st);
             createEventsTable(st);
             createRolesAndUsersTables(st);
-            createSafetyIncidentsTable(st);
+//            createSafetyIncidentsTable(st);
 
 
             System.out.println("Инициализация бд прошла успешно!");
@@ -141,26 +140,6 @@ public class CreateDatabase {
         """);
     }
 
-
-    //  Таблица faces (лица / CompreFace subjects)
-
-
-    private void createFacesTable(Statement st) throws SQLException {
-        st.execute("""
-            CREATE TABLE IF NOT EXISTS faces (
-                face_id BIGSERIAL PRIMARY KEY,
-                face_name TEXT NOT NULL,
-                person_id UUID NOT NULL REFERENCES personnel(person_id) ON DELETE CASCADE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-                UNIQUE (face_name)
-            )
-        """);
-
-        st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_faces_person_id
-                ON faces(person_id)
-        """);
-    }
 
 
     //  Таблица devices (устройства)
@@ -289,40 +268,40 @@ public class CreateDatabase {
     }
 
 
-    //  Таблица нарушений техники безопасности
-
-    private void createSafetyIncidentsTable(Statement st) throws SQLException {
-        st.execute("""
-            CREATE TABLE IF NOT EXISTS safety_incidents (
-                incident_id     BIGSERIAL PRIMARY KEY,
-                person_id       UUID REFERENCES personnel(person_id),
-                guest_id        UUID REFERENCES guests(guest_id),
-                device_id       TEXT REFERENCES devices(device_id),
-                event_time      TIMESTAMPTZ NOT NULL DEFAULT now(),
-                type            TEXT NOT NULL,
-                severity        TEXT,
-                description     TEXT,
-                image_url       TEXT,
-                status          TEXT NOT NULL DEFAULT 'NEW',
-                handled_by      UUID REFERENCES personnel(person_id),
-                handled_at      TIMESTAMPTZ,
-                created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
-            )
-        """);
-
-        st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_safety_incidents_time
-                ON safety_incidents(event_time)
-        """);
-
-        st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_safety_incidents_person
-                ON safety_incidents(person_id)
-        """);
-
-        st.execute("""
-            CREATE INDEX IF NOT EXISTS idx_safety_incidents_type
-                ON safety_incidents(type)
-        """);
-    }
+//    //  Таблица нарушений техники безопасности
+//
+//    private void createSafetyIncidentsTable(Statement st) throws SQLException {
+//        st.execute("""
+//            CREATE TABLE IF NOT EXISTS safety_incidents (
+//                incident_id     BIGSERIAL PRIMARY KEY,
+//                person_id       UUID REFERENCES personnel(person_id),
+//                guest_id        UUID REFERENCES guests(guest_id),
+//                device_id       TEXT REFERENCES devices(device_id),
+//                event_time      TIMESTAMPTZ NOT NULL DEFAULT now(),
+//                type            TEXT NOT NULL,
+//                severity        TEXT,
+//                description     TEXT,
+//                image_url       TEXT,
+//                status          TEXT NOT NULL DEFAULT 'NEW',
+//                handled_by      UUID REFERENCES personnel(person_id),
+//                handled_at      TIMESTAMPTZ,
+//                created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+//            )
+//        """);
+//
+//        st.execute("""
+//            CREATE INDEX IF NOT EXISTS idx_safety_incidents_time
+//                ON safety_incidents(event_time)
+//        """);
+//
+//        st.execute("""
+//            CREATE INDEX IF NOT EXISTS idx_safety_incidents_person
+//                ON safety_incidents(person_id)
+//        """);
+//
+//        st.execute("""
+//            CREATE INDEX IF NOT EXISTS idx_safety_incidents_type
+//                ON safety_incidents(type)
+//        """);
+//    }
 }
