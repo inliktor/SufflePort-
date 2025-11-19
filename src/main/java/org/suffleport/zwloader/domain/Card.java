@@ -17,9 +17,11 @@ public class Card {
     @Column(name = "uid")
     private String uid;
 
-    // пока просто UUID сотрудника; позже можем заменить на @ManyToOne Personnel
-    @Column(name = "person_id", nullable = false)
-    private UUID personId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id")
+    private Personnel person;
+
 
     @Column(name = "is_active", nullable = false)
     private boolean active;
