@@ -143,6 +143,54 @@ public class CardService {
         return cardRepository.countByPerson_IdAndActiveTrue(personId);
     }
 
+    @Transactional(readOnly = true)
+    public Card findByUid(String uid) { return cardRepository.findByUid(uid); }
+
+    public record RegisterResult(String status, String personName) {}
+
+    // Регистрация карты по ФИО (авто-привязка если ровно одно совпадение)
+    @Transactional
+    public RegisterResult registerCardByName(String uid, String fullName) {
+        validateUid(uid);
+        if (fullName == null || fullName.isBlank()) {
+            return new RegisterResult("needs_assignment", null);
+        }
+        List<Personnel> matches = personnelRepository.findByFullName(fullName);
+        if (matches.isEmpty()) {
+            return new RegisterResult("needs_assignment", null);
+        }
+        if (matches.size() > 1) {
+            return new RegisterResult("multiple_matches", null);
+        }
+        Personnel person = matches.get(0);
+        Card existing = cardRepository.findByUid(uid);
+        if (existing != null) {
+            if (existing.getPerson().getId().equals(person.getId())) {
+                return new RegisterResult("already_assigned", existing.getPerson().getFullName());
+            }
+            existing.setPerson(person);
+            cardRepository.save(existing);
+            return new RegisterResult("auto_assigned", person.getFullName());
+        }
+        Card c = new Card();
+        c.setUid(uid);
+        c.setPerson(person); // person NOT NULL
+        c.setActive(true);
+        cardRepository.save(c);
+        return new RegisterResult("auto_assigned", person.getFullName());
+    }
+
+    // Анализ сканирования в режиме регистрации (без имени)
+    @Transactional
+    public RegisterResult analyzeScanStatus(String uid) {
+        validateUid(uid);
+        Card existing = cardRepository.findByUid(uid);
+        if (existing == null) {
+            return new RegisterResult("needs_assignment", null);
+        }
+        return new RegisterResult("already_assigned", existing.getPerson().getFullName());
+    }
+
     private void validateUid(String uid) {
         if (uid == null || uid.isBlank()) {
             throw new IllegalArgumentException("uid is required");
