@@ -1,8 +1,10 @@
 package org.suffleport.zwloader.web;
 
+import lombok.Data;
 import org.suffleport.zwloader.domain.Personnel;
 import org.suffleport.zwloader.service.PersonnelService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,17 +31,21 @@ public class PersonnelController {
     }
 
     @PostMapping
-    public Personnel create(@RequestBody Personnel body) {
-        LocalDate dob = body.getDateOfBirth();
-        UUID positionId = body.getPosition() != null ? body.getPosition().getId() : null;
+    public Personnel create(@RequestBody CreatePersonnelRequest req) {
+        UUID positionId = req.getPositionId();
         return personnelService.create(
-                body.getLastName(),
-                body.getFirstName(),
-                body.getMiddleName(),
-                dob,
+                req.getLastName(),
+                req.getFirstName(),
+                req.getMiddleName(),
+                req.getDateOfBirth(),
                 positionId,
-                body.getPhone()
+                req.getPhone()
         );
+    }
+    
+    @PostMapping(value = "/{id}/avatar", consumes = "multipart/form-data")
+    public Personnel uploadAvatar(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        return personnelService.uploadAvatar(id, file);
     }
 
     @PutMapping("/{id}")
@@ -59,5 +65,15 @@ public class PersonnelController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         personnelService.delete(id);
+    }
+    
+    @Data
+    public static class CreatePersonnelRequest {
+        private String lastName;
+        private String firstName;
+        private String middleName;
+        private LocalDate dateOfBirth;
+        private UUID positionId;
+        private String phone;
     }
 }

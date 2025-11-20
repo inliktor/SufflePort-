@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.suffleport.zwloader.domain.Personnel;
 import org.suffleport.zwloader.domain.Position;
 import org.suffleport.zwloader.repository.PersonnelRepository;
@@ -22,6 +23,7 @@ public class PersonnelService {
 
     private final PersonnelRepository personnelRepository;
     private final PositionRepository positionRepository;
+    private final CompreFaceService compreFaceService;
 
     @Transactional
     public Personnel create(String lastName,
@@ -78,6 +80,26 @@ public class PersonnelService {
 
     @Transactional
     public void delete(UUID id) { personnelRepository.delete(getOrThrow(id)); }
+    
+    @Transactional
+    public Personnel uploadAvatar(UUID id, MultipartFile file) {
+        Personnel p = getOrThrow(id);
+        String subject = buildComprefaceSubject(p);
+        p.setComprefaceSubject(subject);
+        personnelRepository.save(p);
+        if (file != null && !file.isEmpty()) {
+            compreFaceService.uploadFace(id, file);
+        }
+        return p;
+    }
+    
+    private String buildComprefaceSubject(Personnel p) {
+        StringBuilder sb = new StringBuilder();
+        if (p.getLastName() != null) sb.append(p.getLastName()).append(" ");
+        if (p.getFirstName() != null) sb.append(p.getFirstName()).append(" ");
+        if (p.getMiddleName() != null) sb.append(p.getMiddleName());
+        return sb.toString().trim().toLowerCase().replaceAll("\\s+", "_");
+    }
 
     // Поисковые методы
     @Transactional(readOnly = true)
